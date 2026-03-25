@@ -7,26 +7,28 @@ module.exports = {
     entry: path.resolve(__dirname, '../src/index.js'),
     output: {
         filename: 'bundle.[contenthash].js',
-        path: path.resolve(__dirname, '../dist')
+        path: path.resolve(__dirname, '../dist'),
+        clean: true
     },
     plugins: [
         new HtmlWebpackPlugin({
             template: path.resolve(__dirname, '../src/index.html'),
             minify: true
         }),
-        new MiniCssExtractPlugin(),
+        new MiniCssExtractPlugin({
+            filename: 'style.[contenthash].css'
+        }),
         new CopyWebpackPlugin({
             patterns: [
-                { from: path.resolve(__dirname, '../static') }
+                {
+                    from: path.resolve(__dirname, '../static'),
+                    noErrorOnMissing: true
+                }
             ]
         })
     ],
     module: {
         rules: [
-            {
-                test: /\.(html)$/,
-                use: ['html-loader']
-            },
             {
                 test: /\.js$/,
                 exclude: /node_modules/,
@@ -37,16 +39,14 @@ module.exports = {
                 use: [MiniCssExtractPlugin.loader, 'css-loader']
             },
             {
-                test: /\.(jpg|png|gif|svg)$/,
-                use: [
-                    { loader: 'file-loader', options: { outputPath: 'assets/images/' } }
-                ]
+                test: /\.(jpg|jpeg|png|gif|svg|webp)$/,
+                type: 'asset/resource',
+                generator: { filename: 'assets/images/[hash][ext]' }
             },
             {
                 test: /\.(ttf|eot|woff|woff2)$/,
-                use: [
-                    { loader: 'file-loader', options: { outputPath: 'assets/fonts/' } }
-                ]
+                type: 'asset/resource',
+                generator: { filename: 'assets/fonts/[hash][ext]' }
             },
             {
                 test: /\.(glsl|vs|fs|vert|frag)$/,
@@ -54,5 +54,8 @@ module.exports = {
                 use: ['raw-loader']
             }
         ]
+    },
+    resolve: {
+        extensions: ['.js']
     }
 }
